@@ -54,6 +54,7 @@ function Login() {
         }
         else {
             // Navigate to the room
+            // Passing the username while navigating
             navigate(`/dashboard/${roomId}`,{
                 state: {
                     username: username

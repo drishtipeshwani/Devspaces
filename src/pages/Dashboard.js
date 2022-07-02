@@ -1,9 +1,32 @@
 import React from 'react'
-import { Flex, Heading, HStack,Text,Box,Button,Stack} from '@chakra-ui/react'
+import { Flex, Heading, HStack,Text,Box,Button,Stack, VStack} from '@chakra-ui/react'
 import Client from '../components/Client';
-import Editor from '../components/Editor';
+import Canvas from '../components/Canvas';
+import CodeCompiler from '../components/CodeCompiler/CodeCompiler';
+import { initSocket } from '../socket';
+import ACTIONS from '../Actions';
+import {useLocation} from 'react-router-dom'
 
 function Dashboard() {
+
+
+  const location = useLocation()
+
+  // Creating a socket Reference
+
+  const socketRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    // As the user joins the room we initialize the client socket which connects to the server
+    const init = async () => {
+      socketRef.current = await initSocket(); 
+     // socketRef.current.emit(ACTIONS.JOIN,{
+     //   roomId,
+     //   username: location.state?.username,
+     // });
+    }
+    init()
+  },[])
 
    const [clientlist, setClientlist] = React.useState([
     {socketId: '1', username: 'John Doe'},
@@ -31,7 +54,11 @@ function Dashboard() {
            
     </Box>
     <Box>
-    <Editor/>
+   <VStack>
+     <Canvas/>
+     <CodeCompiler/>
+   </VStack>
+    
     </Box>
     </HStack>
    </Flex>
