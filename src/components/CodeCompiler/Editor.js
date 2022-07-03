@@ -3,6 +3,7 @@ import Codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/python/python'
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
 import ACTIONS from '../../Actions';
@@ -13,13 +14,12 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
     useEffect(() => {
         async function init() {
             editorRef.current = Codemirror.fromTextArea(
-                document.getElementById('realtimeEditor'),
+                document.getElementById('realTimeEditor'),
                 {
-                    mode: { name: 'javascript', json: true },
+                    mode: { name: 'python', json: true },
                     theme: 'dracula',
                     autoCloseTags: true,
                     autoCloseBrackets: true,
-                    lineNumbers: true,
                 }
             );
 
@@ -54,7 +54,9 @@ const Editor = ({ socketRef, roomId, onCodeChange }) => {
         };
     }, [socketRef.current]);
 
-    return <textarea id="realtimeEditor" className='editorWrapper'></textarea>;
+    return(
+       <textarea id="realTimeEditor" />
+    )
 };
 
 export default Editor;

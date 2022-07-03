@@ -2,7 +2,8 @@ import React from 'react'
 import { Flex, Heading, HStack,Text,Box,Button,Stack, VStack} from '@chakra-ui/react'
 import Client from '../components/Client';
 import Canvas from '../components/Canvas';
-import CodeCompiler from '../components/CodeCompiler/CodeCompiler';
+import Editor from '../components/CodeCompiler/Editor';
+import Compiler from '../components/CodeCompiler/Compiler';
 import { initSocket } from '../socket';
 import {useLocation, useNavigate, Navigate, useParams} from 'react-router-dom'
 import { useToast } from '@chakra-ui/react';
@@ -22,7 +23,7 @@ function Dashboard() {
   const codeRef = React.useRef(null);
 
   const [Clientlist, setClientlist] = React.useState([]); //Every client is a object with a name and a socket id
-
+  
 
   React.useEffect(()=>{
     // As the user joins the room we initialize the client socket which connects to the server
@@ -61,7 +62,9 @@ function Dashboard() {
             isClosable: true,
           })
         }
+        
         setClientlist(clientlist)
+        
         socketRef.current.emit(ACTIONS.SYNC_CODE, {
           socketId: socketRef.current.id,
           code: codeRef.current,
@@ -78,6 +81,7 @@ function Dashboard() {
           })
         // Filter the clientlist to remove the disconnected client
         setClientlist(Clientlist.filter(client=>client.socketId !== socketId))
+       
       }
       )
 
@@ -126,6 +130,8 @@ function Dashboard() {
     <Heading fontWeight={600} paddingBottom={5}>Devspaces</Heading>
             <Box>
             <Text fontWeight={500} fontSize='xl' paddingBottom= {5}>Connected Users</Text>
+           
+
                {Clientlist.map(client => {
                     return <Client key={client.socketId} username={client.username} />
                })}
@@ -138,11 +144,16 @@ function Dashboard() {
     </Box>
     {/**Divide the page into 2 parts , one to show connected users and other for the code compiler */}
     <Box>
-    <CodeCompiler   socketRef={socketRef}
-                    roomId={roomId}
-                    onCodeChange={(code) => {
-                        codeRef.current = code;
+    <Editor   socketRef={socketRef}
+                roomId={roomId}
+                onCodeChange={(code) => {
+                codeRef.current = code;
                     }}/>
+    </Box>
+    <Box>
+    <Compiler socketRef={socketRef}
+                roomId={roomId}
+                codeRef = {codeRef}/>
     </Box>
     </HStack>
    </Flex>
