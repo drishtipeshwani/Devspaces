@@ -1,90 +1,60 @@
-import React,{useState} from 'react'
-import './Editor.css'
-import Header from './Header'
-import Editor from '@monaco-editor/react'
-import Axios from 'axios';
-import { Spinner } from '@chakra-ui/react'
+import React, { useEffect, useRef } from 'react';
+import Codemirror from 'codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/addon/edit/closetag';
+import 'codemirror/addon/edit/closebrackets';
+import ACTIONS from '../../Actions';
+import './Editor.css';
 
+const Editor = ({ socketRef, roomId, onCodeChange }) => {
+    const editorRef = useRef(null);
+    useEffect(() => {
+        async function init() {
+            editorRef.current = Codemirror.fromTextArea(
+                document.getElementById('realtimeEditor'),
+                {
+                    mode: { name: 'javascript', json: true },
+                    theme: 'dracula',
+                    autoCloseTags: true,
+                    autoCloseBrackets: true,
+                    lineNumbers: true,
+                }
+            );
 
-function CodeCompiler() {
+            editorRef.current.on('change', (instance, changes) => {
+                const { origin } = changes;
+                const code = instance.getValue();
+                onCodeChange(code);
+                if (origin !== 'setValue') {
+                    socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+                        roomId,
+                        code,
+                    });
+                }
+            });
+        }
+        init();
+    }, []);
 
-   const [userCode,setUserCode] = useState('')
-   const [lang,setLang] = useState('')
-   const [theme,setTheme] = useState('')
-   const [input,setInput] = useState('')
-   const [output,setOutput] = useState('')
-   const [loading,setLoading]  = useState(false)
+    useEffect(() => {
+        if (socketRef.current) {
+            socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+                if (code !== null) {
+                    editorRef.current.setValue(code);
+                }
+            });
+        }
 
-  
-   const clearOutput = () => {
-    setOutput("");
-   }
+        return () => {
+            if (socketRef.current) {
+            socketRef.current.off(ACTIONS.CODE_CHANGE);
+            }
+        };
+    }, [socketRef.current]);
 
-   const compileCode = () => {
+    return <textarea id="realtimeEditor" className='editorWrapper'></textarea>;
+};
 
-    setLoading(true)
-
-    // Only if user can enterned code in the editor we call the compile endpoint
-
-    if(userCode.length > 0){
-      Axios.post(`http://localhost:8000/compile`,{code:userCode,lang:lang,theme:theme})
-      .then(res => {
-      setLoading(false)
-      setOutput(res.data.output)
-     }).catch(err => {
-        setLoading(false)
-        setOutput(err.data.output)
-     }
-     )
-    }
- }
-
-
-
-  return (
-    <div>
-      <Header lang={lang} theme={theme} setLang={setLang} setTheme={setTheme}/>
-       <div className="main">
-        <div className="left-container">
-          {/** The Monaco Editor is the code editor that powers VS Code, using the Editor component provided by that */}
-          <Editor
-            height="calc(100vh - 50px)"
-            width="100%"
-            theme = {theme}
-            language={lang}
-            defaultLanguage="javascript"
-            defaultValue="# Enter your code here"
-            onChange={(value) => { setUserCode(value) }}
-          />
-          <button className="run-btn" onClick={() => compileCode()}>
-             Run
-          </button>
-        </div>
-        <div className="right-container">
-          <h4>Input:</h4>
-          <div className="input-box">
-            <textarea id="code-inp" onChange=
-              {(e) => setInput(e.target.value)}>
-            </textarea>
-          </div>
-          <h4>Output:</h4>
-          {loading ? (
-            <div className="spinner-box">
-              <Spinner/>
-            </div>
-          ) : (
-            <div className="output-box">
-              <pre>{output}</pre>
-              <button onClick={() => { clearOutput() }}
-                 className="clear-btn">
-                 Clear
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default CodeCompiler
+export default Editor;

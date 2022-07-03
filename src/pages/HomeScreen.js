@@ -35,7 +35,7 @@ function HomeScreen() {
         </Text>
       </Heading>
       <Text color={'gray.500'} maxW={'3xl'}  fontSize={'xl'}>
-        Devspaces is a platform for developers to collaborate on code together.
+        Devspaces is a platform for developers to collaborate and code together.
       </Text>
       <Stack spacing={6} direction={'row'}>
           <Button
