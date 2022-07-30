@@ -4,7 +4,7 @@
 ## Implementation / Tech Stack
 - Use ReactJS for the frontend development along with Chakra UI.
 - Used ExpressJS framework for creating a server.
-- Used WebRTC and Socket.io library for creating the server and client sockets and enabling connection and communication between them and implementing the video call   feature.
+- Used Socket.io library for creating the server and client sockets and enabling connection and communication between them and simultaneously syncing content between different clients.
 - Used CodeMirror for implementing the code editor.
 - Used Judge0 API to compile the code.
 
